@@ -1,12 +1,12 @@
 import logo from './logo.svg';
 import './App.css';
-import { Flex } from '@chakra-ui/react';
+import { Flex, Button } from '@chakra-ui/react';
 import Compartment from './components/Compartment';
 import Booking from './components/Booking';
 import InputBox from './components/InputBox';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
-
+import DisplaySeats from './components/DisplaySeats';
 function App() {
 
   // State variables
@@ -35,6 +35,11 @@ function App() {
       setLoading(true);
     }
   };
+
+
+  const getBookedSeats = () => {
+    console.log( data.filter((seat) => seat.isBooked));
+  }
   const handleClick = (seatNumber) => {
     console.log(seatNumber);
     setSeatNumber(seatNumber);
@@ -96,8 +101,10 @@ function App() {
 
       {/* Compartment component to display seat grid */}
       {
+        new URLSearchParams(window.location.search).get('admin') === 'true'  ? <DisplaySeats data={data}/> :
         !booking ? <Compartment data={data} loading={loading} handleClick={handleClick} /> : <Booking seatNumber={seatNumber} handleBooking={handleBooking}></Booking>
       }
+      {}
     </Flex>
   );
 }
