@@ -5,11 +5,11 @@ const dotenv = require("dotenv");
 dotenv.config();
 connectionDB();
 
-
+console.log("populating db");
 
 function populateDB(){
-    NUM_ROWS = 12;
-    NUM_SEATS_PER_ROW = 7;
+    NUM_ROWS = 4;
+    NUM_SEATS_PER_ROW = 5;
     NUM_SEATS = NUM_ROWS * NUM_SEATS_PER_ROW;
     NUM_MONITORS = parseInt(NUM_SEATS *(0.3)); // 30 percent sys with monitor
     for (let i = 1; i <= NUM_SEATS; i++) {

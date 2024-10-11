@@ -2,6 +2,7 @@
 
 const mongoose = require("mongoose");
 const Seat = require("../models/seats.model");
+console.log("MongoDB connected ");
 
 const connectionDB = async () => {
   try {

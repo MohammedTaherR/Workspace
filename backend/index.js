@@ -15,8 +15,9 @@ app.get("/",(req, res)=>{
     console.log("unstop assignment");
 })
 
-
 //  seats routes
+console.log("unstop assignment");
+
 app.use("/api/seats", seatsRoutes);
 
 

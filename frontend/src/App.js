@@ -7,7 +7,6 @@ import InputBox from './components/InputBox';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 import DisplaySeats from './components/DisplaySeats';
-import Login from './components/login';
 import {gapi} from 'gapi-script';
 import Login from './components/login';
 import Logout from './components/logout';
@@ -123,7 +122,10 @@ function App() {
     <>
     <div>
       {!isLoggedIn && <Login onLogin={handleLogin} />}
-      {isLoggedIn && (
+
+      {isLoggedIn && <Logout onLogout={handleLogout} />}
+      {isLoggedIn  && (
+      
         <Flex justify={"space-around"} align={"center"} h="100vh" minHeight={"fit-content"} bg={"#E5E7EB"} >
           {/* Compartment component to display seat grid */}
           {
@@ -132,7 +134,6 @@ function App() {
           }
         </Flex>
       )}
-      <Logout onLogout={handleLogout}/>
     </div>
     </>
   );
