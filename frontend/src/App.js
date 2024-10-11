@@ -7,6 +7,7 @@ import InputBox from './components/InputBox';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 import DisplaySeats from './components/DisplaySeats';
+import Login from './components/login';
 function App() {
 
   // State variables
@@ -97,13 +98,11 @@ function App() {
       });    
   }
   return (
+    new URLSearchParams(window.location.search).get('admin') === 'true'  ? <DisplaySeats data={data}/> :
     <Flex justify={"space-around"} align={"center"} h="100vh" minHeight={"fit-content"} bg={"#E5E7EB"} >
-
-      {/* Compartment component to display seat grid */}
       {
-        new URLSearchParams(window.location.search).get('admin') === 'true'  ? <DisplaySeats data={data}/> :
         !booking ? <Compartment data={data} loading={loading} handleClick={handleClick} /> : <Booking seatNumber={seatNumber} handleBooking={handleBooking}></Booking>
-      }
+      } 
       {}
     </Flex>
   );
