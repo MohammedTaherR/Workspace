@@ -120,6 +120,7 @@ function App() {
         empGmail: user.email,
         empName: user.name,
       }
+      setBooking(true);
       handleBooking(dataPayload);
     }
   }
@@ -184,6 +185,7 @@ function App() {
         if (!res.data.ok) {
           alert(`booking failed ${res.data.message}`);
         }
+        setBooking(false);
         fetchData();
       })
       .catch((err) => {
