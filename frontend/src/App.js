@@ -7,6 +7,12 @@ import InputBox from './components/InputBox';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 import DisplaySeats from './components/DisplaySeats';
+import {gapi} from 'gapi-script';
+import Login from './components/login';
+import Logout from './components/logout';
+
+const clientId = "1049231966219-acsq85p6t0ccpd8orh0cdku3lq38qcs5.apps.googleusercontent.com";
+
 function App() {
 
   // State variables
@@ -18,9 +24,25 @@ function App() {
 
   // Fetch seat data on component mount
   useEffect(() => {
+    function start() {
+      gapi.client.init({
+        clientId: clientId,
+        scope: ''
+      })
+    };
+    gapi.load('client:auth2', start);
     fetchData();
   }, []);
 
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  const handleLogin = (success) => {
+    setIsLoggedIn(success);
+  }
+
+  const handleLogout = (failed) => {
+    setIsLoggedIn(failed);
+  }
   // Fetch seat data from the server
   const fetchData = async () => {
 
@@ -97,15 +119,21 @@ function App() {
       });    
   }
   return (
-    <Flex justify={"space-around"} align={"center"} h="100vh" minHeight={"fit-content"} bg={"#E5E7EB"} >
-
-      {/* Compartment component to display seat grid */}
-      {
-        new URLSearchParams(window.location.search).get('admin') === 'true'  ? <DisplaySeats data={data}/> :
-        !booking ? <Compartment data={data} loading={loading} handleClick={handleClick} /> : <Booking seatNumber={seatNumber} handleBooking={handleBooking}></Booking>
-      }
-      {}
-    </Flex>
+    <>
+    <div>
+      {!isLoggedIn && <Login onLogin={handleLogin} />}
+      {isLoggedIn && (
+        <Flex justify={"space-around"} align={"center"} h="100vh" minHeight={"fit-content"} bg={"#E5E7EB"} >
+          {/* Compartment component to display seat grid */}
+          {
+            new URLSearchParams(window.location.search).get('admin') === 'true'  ? <DisplaySeats data={data}/> :
+            !booking ? <Compartment data={data} loading={loading} handleClick={handleClick} /> : <Booking seatNumber={seatNumber} handleBooking={handleBooking}></Booking>
+          }
+        </Flex>
+      )}
+      <Logout onLogout={handleLogout}/>
+    </div>
+    </>
   );
 }
 

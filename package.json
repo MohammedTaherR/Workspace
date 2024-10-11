@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "react-calendar": "^5.0.0",
+    "react-google-calendar-api": "^2.3.0"
+  }
+}
