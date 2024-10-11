@@ -5,7 +5,7 @@ const Seat = require('../models/seats.model');
 /*
   {
     seatNumber, 
-        EID,
+        EEmail,
         Ename,
         date from,
         date to,
@@ -69,14 +69,14 @@ async function cancelSeat(req,res) {
       return { message: `Seat with number ${seatNumber} not found` };
     }
     seat.isBooked = false;
-    seat.empId = '';
-    seat.empName = '';
+    seat.empGmail = null;
+    seat.empName = null;
     seat.bookingDateFrom = null;
     seat.bookingDateTo = null;
     await seat.save();
-    return res.status(200).json({ message: `Seat with number ${seatNumber} cancelled successfully` });
+    return res.status(200).json({ message: `Seat with number ${seatNumber} cancelled successfully`, ok: true });
   } catch (err) {
-    return res.status(500).json({ message: 'Internal Server Error' });
+    return res.status(500).json({ message: 'Internal Server Error', ok: false });
   }
 }
 
@@ -90,8 +90,8 @@ async function addSeat(req,res) {
       isBooked: false,
       rowNumber: Math.ceil(seatNumber/7),
       isMonitorPresent: req.body.isMonitorPresent,
-      empId : '',
-      empName : '',
+      empGmail : null,
+      empName : null,
       bookingDateFrom : null,
       bookingDateTo : null
     });
