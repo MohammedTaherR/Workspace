@@ -20,7 +20,7 @@ export default function Compartment({ loading, data,handleClick }) {
             {loading ? <Heading size='md' textAlign={"center"}  > Ticket Booking </Heading> : <Text textAlign={"center"} as="b" > Please Wait. </Text>}
 
             {/* Seat grid */}
-            <Grid templateColumns='repeat(7, 1fr)' gap={1} bg="#FAFAFA" minH={"fit-content"} h="80vh" minW={"400px"} w="fit-content" rounded={"lg"} p="2">
+            <Grid templateColumns='repeat(7, 1fr)' gap={1} bg="#FAFAFA" minH={"fit-content"} h="80vh" minW={"400px"} w="fit-content" rounded={"lg"} p="2" overflow= "auto">
                 {data?.map((item) => (
                     <Seat key={item._id} isBooked={item.isBooked} seatNumber={item.seatNumber} handleClick={handleClick} isMonitor={item.isMonitorPresent} />
                 ))}
