@@ -7,6 +7,7 @@ import InputBox from './components/InputBox';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 import DisplaySeats from './components/DisplaySeats';
+import Login from './components/login';
 import {gapi} from 'gapi-script';
 import Login from './components/login';
 import Logout from './components/logout';
