@@ -31,7 +31,7 @@ function App() {
 
   const checkLoginStatus = () => {
     try {
-      const user = localStorage.getItem('user');
+      const user = JSON.parse(localStorage.getItem('user'));
       if (user) {
         setIsLoggedIn(true);
         setUser(user);
@@ -51,7 +51,7 @@ function App() {
     if (!key || !value) return;
     try {
       // TODO: add a expiration time for stored kvs
-      localStorage.setItem(key, value);
+      localStorage.setItem(key, JSON.stringify(value));
     } catch (e) {
       console.error(`Unable to store ${key} in local storage : ${e}`);
     }
