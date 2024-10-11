@@ -20,6 +20,9 @@ export default function HookForm({handleBooking,seatNumber}) {
 
     function onSubmit(e) {
         e.preventDefault();
+        if(data.empId === '' || data.empName === ''){
+            return;
+        }
         handleBooking(data);
     }
 
@@ -62,10 +65,10 @@ export default function HookForm({handleBooking,seatNumber}) {
             ) : null}
           </FormControl>
   
-          <Button mt={4} colorScheme="teal" type="submit">
+          <Button mt={4} colorScheme="teal" type="submit" disabled={data.empId === '' || data.empName === ''}>
             Submit
           </Button>
         </form>
-      </Box>
+      </Box>  
   )
 }
