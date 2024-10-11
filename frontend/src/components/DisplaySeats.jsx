@@ -1,12 +1,27 @@
 import React from 'react'
 import CancelDialog from './CancelDialog';
+import RemoveSeatDialog from './RemoveSeatDialog';
 import AddSeatDialog from './AddSeatDialog';
 import { Box, Flex, Table,Text, Thead, Tbody, Tr, Th, Td, TableContainer, Button } from '@chakra-ui/react'
 
 export default function DisplaySeats({data}) {
+
+
+  const cancelRef = React.useRef()
+
+  const [itemToCancel, setItemToCancel] = React.useState("")
+  
   const [isOpen, setIsOpen] = React.useState(false)
   const onClose = () => setIsOpen(false)
-  const cancelRef = React.useRef()
+
+  const [isAddSeatOpen, setIsAddSeatOpen] = React.useState(false)
+  const onAddSeatClose = () => setIsAddSeatOpen(false)
+
+  const [isRemoveSeatOpen, setIsRemoveSeatOpen] = React.useState(false)
+  const onRemoveSeatClose = () => setIsRemoveSeatOpen(false)
+
+
+
     const BookedSeats = data?.filter((seat) => seat.isBooked);
     console.log(BookedSeats)
     if (!BookedSeats || BookedSeats.length === 0) {
@@ -17,21 +32,20 @@ export default function DisplaySeats({data}) {
             <Button
               size="sm"
               colorScheme="blue"
-              onClick={() => setIsOpen(true)}
+              onClick={() => setIsAddSeatOpen(true)}
             >
               Add new Seats
             </Button>
-            <AddSeatDialog isOpen={isOpen} onClose={onClose} />   
+            <AddSeatDialog isOpen={isAddSeatOpen} onClose={onAddSeatClose} />   
             <Button
               size="sm"
               colorScheme="red"
-              onClick={() => {
-                window.location.href = "/removeseats";
-              }}
+              onClick={() => setIsRemoveSeatOpen(true)}
               isDisabled={true}
             >
               Remove Seats
             </Button>
+            <RemoveSeatDialog isOpen={isRemoveSeatOpen} onClose={onRemoveSeatClose} />
           </Flex>
         </Flex>
       );
@@ -62,12 +76,14 @@ export default function DisplaySeats({data}) {
                     <Button
                       size="sm"
                       colorScheme="red"
-                      ref={cancelRef}
-                      onClick={() => setIsOpen(true)}
+                      onClick={() => {
+                        setIsOpen(true);
+                        setItemToCancel(item);
+                      }}
                     >
                       Cancel
                     </Button>
-                    <CancelDialog isOpen={isOpen} onClose={onClose} item={item} cancelRef={cancelRef} />
+                    <CancelDialog isOpen={isOpen} onClose={onClose} item={itemToCancel} cancelRef={cancelRef} />
                   </Td>
                 </Tr>
               ))}
@@ -78,22 +94,21 @@ export default function DisplaySeats({data}) {
           <Button
             size="sm"
             colorScheme="blue"
-            onClick={() => setIsOpen(true)}
+            onClick={() => setIsAddSeatOpen(true)}
           >
-            <AddSeatDialog isOpen={isOpen} onClose={onClose} />   
+            <AddSeatDialog isOpen={isAddSeatOpen} onClose={onAddSeatClose} />   
             Add new Seats
           </Button>
           <Button
             size="sm"
             colorScheme="red"
-            onClick={() => {
-              window.location.href = "/removeseats";
-            }}
+            onClick={() => setIsRemoveSeatOpen(true)}
             isDisabled={BookedSeats.length === 0}
           >
             Remove Seats
           </Button>
-        </Flex>
+          <RemoveSeatDialog isOpen={isRemoveSeatOpen} onClose={onRemoveSeatClose} />
+          </Flex>
         </Box>
       </Flex>
     )
