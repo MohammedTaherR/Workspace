@@ -2,31 +2,26 @@ import React from 'react'
 
 import { Button, AlertDialog, AlertDialogBody, AlertDialogFooter, AlertDialogHeader, AlertDialogContent, AlertDialogOverlay, FormControl,Text,  FormLabel, Input } from '@chakra-ui/react'
 
+
+import axios from 'axios'
+
 export default function AddSeatDialog({isOpen, onClose}) {
   const [seatNumber, setSeatNumber] = React.useState('')
   const [isMonitorPresent, setIsMonitorPresent] = React.useState(false)
   const [isError, setIsError] = React.useState(false)
 
   const handleAddSeat = async () => {
-    // try {
-    //   const response = await fetch('/api/seats/add', {
-    //     method: 'POST',
-    //     headers: {
-    //       'Content-Type': 'application/json'
-    //     },
-    //     body: JSON.stringify({seatNumber, isMonitorPresent})
-    //   })
-    //   const data = await response.json()
-    //   if (data.error) {
-    //     setIsError(true)
-    //   } else {
-    //     onAddSeat(data)
-    //     onClose()
-    //   }
-    // } catch (error) {
-    //   console.log(error)
-    //   setIsError(true)
-    // }
+    try {
+      const response = await axios.post('http://localhost:8080/api/seats/add', {
+        seatNumber: seatNumber,
+        isMonitorPresent: isMonitorPresent
+      })
+      console.log(response.data)
+      window.location.reload()
+    } catch (error) {
+      console.error(error)    
+    }
+    onClose()
   }
 
   return (

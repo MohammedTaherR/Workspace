@@ -1,108 +1,6 @@
 // controller.js
 const Seat = require('../models/seats.model');
 
-// // Controller function to book seats
-// const bookingController = async (req, res) => {
-//   const { numOfSeats } = req.body;
-//   if (numOfSeats > 7) {
-//     return res.status(400).json({ message: 'Not able to book more than 7 seats' });
-//   }
-
-//   try {
-
-//     //  get available seats
-//     const availableSeats = await Seat.find({ isBooked: false })
-//       .sort({ rowNumber: 1, seatNumber: 1 });
-
-//     // if not enough seats available
-//     if (availableSeats.length < numOfSeats) {
-//       return res.status(500).json({ message: `Booking failed, Only ${availableSeats.length} seats available to book.` });
-//     }
-
-//     const rowCount = 12;
-
-//     // booked seats in same row
-//     for (let row = 1; row <= rowCount; row++) {
-//       const rowSeats = availableSeats.filter(seat => seat.rowNumber === row);
-//       const falseCount = rowSeats.reduce((count, seat) => count + (!seat.isBooked ? 1 : 0), 0);
-//       if (falseCount >= numOfSeats) {
-//         const availableToBook = rowSeats.filter(seat => !seat.isBooked).slice(0, numOfSeats);
-//         for (let i = 0; i < availableToBook.length; i++) {
-//           const seat = availableToBook[i];
-//           seat.isBooked = true;
-//           await seat.save();
-//         }
-//         return res.status(200).json({ data: availableToBook });
-//       }
-//     }
-
-//     // book seats in different nearby row, only if not available in same row
-
-//     // find a array for total number of available seats in each row
-//     let arr = [];
-//     for (let row = 1; row <= rowCount; row++) {
-//       const rowSeats = availableSeats.filter(seat => seat.rowNumber === row);
-//       const falseCount = rowSeats.reduce((count, seat) => count + (!seat.isBooked ? 1 : 0), 0);
-//       arr.push(falseCount);
-//     }
-
-    
-//     // variables user in below logic
-//     let minLength = Infinity;
-//     let minStart = -1;
-//     let minEnd = -1;
-//     let start = 0;
-//     let end = 0;
-//     let sum = 0;
-
-
-//     //  find nearby rows
-//     while (end < arr.length) {
-//       sum += arr[end];
-
-//       while (sum >= numOfSeats) {
-//         let length = end - start + 1;
-//         if (length < minLength) {
-//           minLength = length;
-//           minStart = start;
-//           minEnd = end;
-//         }
-//         sum -= arr[start];
-//         start++;
-//       }
-//       end++;
-//     }
-
-
-//     // final array to update
-//     let finalArray = []
-//     for (let row = minStart + 1; row <= minEnd + 1; row++) {
-//       const rowSeats = availableSeats.filter(seat => { if (seat.rowNumber === row) { finalArray.push(seat) } });
-//     }
-//     finalArray = finalArray.slice(0, numOfSeats)
-
-//     // update seats in nearby row
-//     for (let i = 0; i < finalArray.length; i++) {
-//       const seat = finalArray[i];
-//       seat.isBooked = true;
-//       await seat.save();
-//     }
-
-//     // send response if nearby seats booking done
-//     if (finalArray) {
-//       return res.status(200).json({ data: finalArray });
-//     }
-
-//     // if booking failed
-//     return res.status(500).json({ message: 'Booking failed' });
-
-//   } catch (error) {
-//     console.error(error);
-//     return res.status(500).json({ message: 'Internal Server Error' });
-//   }
-// };
-
-
 // Controller function to book seats
 /*
   {
@@ -150,17 +48,60 @@ const bookingController = async (req, res) => {
       res.status(500).json({ message: 'Internal Server Error' });
     }
 }
-async function deleteSeat(seatNumber) {
+async function deleteSeat(req, res) { 
+  seatNumber = req.body.seatNumber;
   try {
     const result = await Seat.deleteOne({ seatNumber: seatNumber });
     if (result.deletedCount === 0) {
       return { message: `Seat with number ${seatNumber} not found` };
     }
-    return { message: `Seat with number ${seatNumber} deleted successfully` };
+    return res.status(200).json({ message: `Seat with number ${seatNumber} deleted successfully` });
   } catch (err) {
-    return { message: 'Internal Server Error' };
+    return res.status(500).json({ message: 'Internal Server Error' });
   }
 }
+// cancel seats
+async function cancelSeat(req,res) {
+  const seatNumber = req.body.seatNumber;
+  try {
+    const seat = await Seat.findOne({ seatNumber: seatNumber });
+    if (!seat) {
+      return { message: `Seat with number ${seatNumber} not found` };
+    }
+    seat.isBooked = false;
+    seat.empId = '';
+    seat.empName = '';
+    seat.bookingDateFrom = null;
+    seat.bookingDateTo = null;
+    await seat.save();
+    return res.status(200).json({ message: `Seat with number ${seatNumber} cancelled successfully` });
+  } catch (err) {
+    return res.status(500).json({ message: 'Internal Server Error' });
+  }
+}
+
+
+// add seats
+async function addSeat(req,res) {
+  const {seatNumber, isMonitorPresent} = req.body;
+  try {
+    const seat = new Seat({
+      seatNumber: seatNumber,
+      isBooked: false,
+      rowNumber: Math.ceil(seatNumber/7),
+      isMonitorPresent: req.body.isMonitorPresent,
+      empId : '',
+      empName : '',
+      bookingDateFrom : null,
+      bookingDateTo : null
+    });
+    await seat.save();
+    return res.status(200).json({ message: `Seat with number ${seatNumber} added successfully` });
+  } catch (err) {
+    return res.status(500).json({ message: 'Internal Server Error' });
+  }
+}
+
 // get seats
 const getSeats = async (req, res) => {
   try {
@@ -204,4 +145,4 @@ const resetSeatsController = async (req, res) => {
 
 
 
-module.exports = { bookingController, resetSeatsController, getSeats, deleteSeat };
+module.exports = { bookingController, resetSeatsController, getSeats, deleteSeat , cancelSeat, addSeat};
