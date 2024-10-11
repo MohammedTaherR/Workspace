@@ -3,12 +3,25 @@ import React from 'react'
 import { AlertDialog, AlertDialogBody, AlertDialogFooter, AlertDialogHeader, AlertDialogContent, FormControl, FormLabel, Input, Button, AlertDialogOverlay } from '@chakra-ui/react'
 import { Box, Flex, Text } from '@chakra-ui/react'
 
+
+import axios from 'axios'
+
 export default function  RemoveSeatDialog({isOpen, onClose}) {
     const [seatNumber, setSeatNumber] = React.useState('')
     const [isMonitorPresent, setIsMonitorPresent] = React.useState(false)
     const [isError, setIsError] = React.useState(false)
     const handleRemoveSeat = () => {
-        
+        axios
+        .post('http://localhost:8080/api/seats/remove', {
+          seatNumber: seatNumber
+        })
+        .then((res) => {
+          console.log(res.data)
+          window.location.reload()
+        })
+        .catch((err) => {
+          console.error('Error while cancelling booking ', err)
+        })
     }
     return (
         <AlertDialog

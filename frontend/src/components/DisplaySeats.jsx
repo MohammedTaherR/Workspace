@@ -41,7 +41,6 @@ export default function DisplaySeats({data}) {
               size="sm"
               colorScheme="red"
               onClick={() => setIsRemoveSeatOpen(true)}
-              isDisabled={true}
             >
               Remove Seats
             </Button>
@@ -103,7 +102,6 @@ export default function DisplaySeats({data}) {
             size="sm"
             colorScheme="red"
             onClick={() => setIsRemoveSeatOpen(true)}
-            isDisabled={BookedSeats.length === 0}
           >
             Remove Seats
           </Button>
