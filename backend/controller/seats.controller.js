@@ -168,6 +168,18 @@ const getSeats = async (req, res) => {
   }
 }
 
+async function deleteSeat(seatNumber) {
+  try {
+    const result = await Seat.deleteOne({ seatNumber: seatNumber });
+    if (result.deletedCount === 0) {
+      return { message: `Seat with number ${seatNumber} not found` };
+    }
+    return { message: `Seat with number ${seatNumber} deleted successfully` };
+  } catch (err) {
+    return { message: 'Internal Server Error' };
+  }
+}
+
 //  reset all seats to available
 function populateDB(){
   NUM_ROWS = 12;
@@ -198,4 +210,4 @@ const resetSeatsController = async (req, res) => {
 
 
 
-module.exports = { bookingController, resetSeatsController, getSeats };
+module.exports = { bookingController, resetSeatsController, getSeats, deleteSeat};
