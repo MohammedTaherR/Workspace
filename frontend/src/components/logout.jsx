@@ -8,32 +8,28 @@ function Logout({ onLogout }) {
     console.log('Logout Success: currentUser:');
     onLogout(res);
   };
-
   return (
     <Flex
-      direction="column"
+      position="fixed"
+      top={4}
+      right={4}
       align="center"
       justify="center"
-      minH="100vh"
-      bgGradient="linear-gradient(90deg, #56B3FA 0%, #2E8BC0 100%)"
     >
-      <Text fontSize="4xl" fontWeight="bold" color="white" mb={4}>
-        Dashboard
-      </Text>
-
       <GoogleLogout
         clientId={clientId}
         buttonText="Logout"
         onLogoutSuccess={onSuccess}
         render={(renderProps) => (
           <Button
-            variant="solid"
             size="lg"
+            variant="solid"
             onClick={renderProps.onClick}
             disabled={renderProps.disabled}
-            colorScheme="blue"
+            bg="blue.500"
+            color="white"
           >
-            Logout with Google
+            Logout
           </Button>
         )}
       />
