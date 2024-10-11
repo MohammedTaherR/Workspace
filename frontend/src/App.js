@@ -1,13 +1,11 @@
-import logo from './logo.svg';
 import './App.css';
-import { Flex, Button } from '@chakra-ui/react';
+import { Flex } from '@chakra-ui/react';
 import Compartment from './components/Compartment';
 import Booking from './components/Booking';
-import InputBox from './components/InputBox';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 import DisplaySeats from './components/DisplaySeats';
-import {gapi} from 'gapi-script';
+import { gapi } from 'gapi-script';
 import Login from './components/login';
 import Logout from './components/logout';
 
@@ -20,34 +18,73 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [booking, setBooking] = useState(false);
   const [seatNumber, setSeatNumber] = useState(0);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userEmail, setUserEmail] = useState('');
 
 
   // Fetch seat data on component mount
   useEffect(() => {
-    function start() {
-      gapi.client.init({
-        clientId: clientId,
-        scope: ''
-      })
-    };
-    gapi.load('client:auth2', start);
+    checkLoginStatus();
     fetchData();
   }, []);
 
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const checkLoginStatus = () => {
+    try {
+      const userEmail = localStorage.getItem('email');
+      if (userEmail) {
+        setIsLoggedIn(true);
+        return;
+      }
+      gapi.load('client:auth2', () => {
+        gapi.client.init({
+          clientId: clientId,
+          scope: ''
+        })
+      });
+    } catch (e) {
+      console.error(`Error while loading gapi : ${e}`);
+    }
 
-  const handleLogin = (success) => {
-    setIsLoggedIn(success);
+  }
+  const storeToLocalStorage = (email) => {
+    if (email.trim().length === 0) {
+      return;
+    }
+    try {
+      localStorage.setItem('email', email);
+    } catch (e) {
+      console.error(`Unable to store email in local storage : ${e}`);
+    }
+  }
+
+  const removeFromLocalStorage = () => {
+    try {
+      localStorage.removeItem('email');
+    } catch (e) {
+      console.error(`Unable to remove email from local storage : ${e}`);
+    }
+  }
+
+  const handleLogin = (response) => {
+    const email = response.profileObj.email;
+    if(!email || email == ''){
+      console.error('Failure in resolution of user email');
+      setIsLoggedIn(false);
+      return;
+    }
+    storeToLocalStorage(email);
+    setIsLoggedIn(true);
+    setUserEmail(email);
+
   }
 
   const handleLogout = (failed) => {
+    removeFromLocalStorage();
     setIsLoggedIn(failed);
   }
   // Fetch seat data from the server
   const fetchData = async () => {
-
     setLoading(false);
-
     try {
       const response = await axios.get("http://localhost:8080/api/seats");
       setLoading(true);
@@ -58,14 +95,37 @@ function App() {
     }
   };
 
-
-  const getBookedSeats = () => {
-    console.log( data.filter((seat) => seat.isBooked));
+  const checkBookingStatus = (seatNumber) => {
+    if(!data){
+      return;
+    }
+    const seat = data.find(seat => seat.seatNumber == seatNumber);
+    console.log('seat : ',seat);
+    if(seat && seat.isBooked){
+      console.log(`user email : ${seat.empGmail} == ${userEmail}`);
+      if(seat.empGmail !== userEmail){
+        return;
+      }
+      if(seat.empGmail === userEmail){
+        const cancelConfirmation = window.confirm('Are you sure you want to unbook this seat?');
+        if(cancelConfirmation === true){
+          handleCancel(seatNumber);
+        }
+      }
+    }else{
+      console.log('booking seatNumber : ',seatNumber);
+      setSeatNumber(seatNumber);
+      setBooking(true);
+    }
   }
+
+  const handleCancel = (seatNumber) => {
+    console.log('cancel seatNumber : ',seatNumber);
+    // TODO: handle if not all params are available and make the repective api call
+  }
+
   const handleClick = (seatNumber) => {
-    console.log(seatNumber);
-    setSeatNumber(seatNumber);
-    setBooking(true);
+    checkBookingStatus(seatNumber);
   }
 
   function getNextMonday() {
@@ -107,34 +167,37 @@ function App() {
     axios.post("http://localhost:8080/api/seats/book", payload)
       .then((res) => {
         console.log(res.data);
-        if(!res.data.ok){
+        if (!res.data.ok) {
           alert(`booking failed ${res.data.message}`);
         }
         fetchData();
         setBooking(false);
       })
       .catch((err) => {
-        console.log('error while booking ',err);
+        console.log('error while booking ', err);
         setBooking(false);
-      });    
+      });
   }
   return (
     <>
-    <div>
-      {!isLoggedIn && <Login onLogin={handleLogin} />}
-
-      {isLoggedIn && <Logout onLogout={handleLogout} />}
-      {isLoggedIn  && (
-      
-        <Flex justify={"space-around"} align={"center"} h="100vh" minHeight={"fit-content"} bg={"#E5E7EB"} >
-          {/* Compartment component to display seat grid */}
-          {
-            new URLSearchParams(window.location.search).get('admin') === 'true'  ? <DisplaySeats data={data}/> :
-            !booking ? <Compartment data={data} loading={loading} handleClick={handleClick} /> : <Booking seatNumber={seatNumber} handleBooking={handleBooking}></Booking>
-          }
-        </Flex>
-      )}
-    </div>
+      {
+        !isLoggedIn ?
+          (
+            <Login onLogin={handleLogin} />
+          )
+          :
+          (<div>
+            <Logout onLogout={handleLogout} />
+            {/* create a state to handle admin user and normal user, move the below portions to a ternary operator for better readability */}
+            <Flex justify={"space-around"} align={"center"} h="100vh" minHeight={"fit-content"} bg={"#E5E7EB"} >
+              {/* Compartment component to display seat grid */}
+              {
+                new URLSearchParams(window.location.search).get('admin') === 'true' ? <DisplaySeats data={data} /> :
+                  !booking ? <Compartment data={data} loading={loading} handleClick={handleClick} /> : <Booking seatNumber={seatNumber} handleBooking={handleBooking}></Booking>
+              }
+            </Flex>
+          </div>)
+      }
     </>
   );
 }

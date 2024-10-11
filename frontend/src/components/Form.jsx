@@ -13,14 +13,17 @@ import { useState } from 'react'
 
 export default function HookForm({handleBooking,seatNumber}) {
     const [data,setData]=useState({
-        empId:'',
+        empGmail: localStorage.getItem('email') || '',
         empName:'',
         seatNumber:seatNumber,
     });
 
     function onSubmit(e) {
         e.preventDefault();
-        if(data.empId === '' || data.empName === ''){
+        if(data.empName === ''){
+            return;
+        }
+        if(data.empGmail === ''){
             return;
         }
         handleBooking(data);
@@ -42,19 +45,6 @@ export default function HookForm({handleBooking,seatNumber}) {
           <Text>Seat Number : {seatNumber}</Text>
         </Heading>
         <form onSubmit={onSubmit}>
-          <FormControl isInvalid={data.empId === ''}>
-            <FormLabel htmlFor="name">Employee ID</FormLabel>
-            <Input
-              id="emp_id"
-              placeholder="Employee ID"
-              value={data.empId}
-              onChange={(e) => setData({ ...data, empId: e.target.value })}
-            />
-            {!data.empId ? (
-              <FormErrorMessage>Employee ID is required.</FormErrorMessage>
-            ) : null}
-          </FormControl>
-  
           <FormControl isInvalid={data.empName === ''}>
             <FormLabel htmlFor="name">Employee Name</FormLabel>
             <Input
@@ -67,8 +57,7 @@ export default function HookForm({handleBooking,seatNumber}) {
               <FormErrorMessage>Employee Name is required.</FormErrorMessage>
             ) : null}
           </FormControl>
-  
-          <Button mt={4} colorScheme="teal" type="submit" disabled={data.empId === '' || data.empName === ''}>
+          <Button mt={4} colorScheme="teal" type="submit" disabled={data.empGmail === '' || data.empName === ''}>
             Submit
           </Button>
         </form>

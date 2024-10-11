@@ -18,7 +18,7 @@ const seatsSechma = new Schema({
     type: Boolean,
     default: false
   },
-  empId : {
+  empGmail : {
     type: String,
     default: null
   },

@@ -59,7 +59,7 @@ export default function DisplaySeats({data}) {
                   <Thead backgroundColor="#f7f7f7">
               <Tr>
                 <Th fontSize="lg" fontWeight="bold" color="gray.600">Seat Number</Th>
-                <Th fontSize="lg" fontWeight="bold" color="gray.600">Emp ID</Th>
+                <Th fontSize="lg" fontWeight="bold" color="gray.600">Emp Gmail</Th>
                 <Th fontSize="lg" fontWeight="bold" color="gray.600">Emp Name</Th>
                 <Th fontSize="lg" fontWeight="bold" color="gray.600">Monitor Availability</Th>
               </Tr>
@@ -68,7 +68,7 @@ export default function DisplaySeats({data}) {
               {BookedSeats?.map((item) => (
                 <Tr key={item._id} _hover={{ backgroundColor: '#f2f2f2' }}>
                   <Td fontSize="md" color="gray.800">{item.seatNumber}</Td>
-                  <Td fontSize="md" color="gray.800">{item.empId || '-'}</Td>
+                  <Td fontSize="md" color="gray.800">{item.empGmail || '-'}</Td>
                   <Td fontSize="md" color="gray.800">{item.empName || '-'}</Td>
                   <Td fontSize="md" color="gray.800">{item.isMonitorPresent ? 'Yes' : 'No'}</Td>
                   <Td>

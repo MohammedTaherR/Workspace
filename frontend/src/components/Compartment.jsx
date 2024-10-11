@@ -3,7 +3,7 @@ import React from 'react'
 import Seat from './Seat'
 
 // Compartment component that displays the seat grid and booking status.
-export default function Compartment({ loading, data,handleClick }) {
+export default function Compartment({ loading, data, handleClick }) {
 
     let booked =0
     let notBooked =0

@@ -119,30 +119,26 @@ const bookingController = async (req, res) => {
       dateFrom,
       dateTo,
       seatNumber,
-      empId,
+      empGmail,
       empName
     } = req.body;
     // console.log('booking from be',req.body);
     try{
       let seat  = await Seat.findOne({ seatNumber });
-      let empIdSeat = await Seat.findOne({ empId: empId }); 
-      // console.log('seat', seat);
-      // console.log('empId', empIdSeat);
-      
+      let empSeat = await Seat.findOne({ empGmail });       
       if(!seat){
         return res.status(200).json({ message: 'Seat not found',ok: false });
       }
       if(seat.isBooked){
         return res.status(200).json({ message: 'Seat already booked',ok: false  });
       }
-      if(empIdSeat){
-        // console.log('emp', empIdSeat,'already exisits');
+      if(empSeat){
         return res.status(200).json({ message: 'Employee already booked seats',ok: false  });
       }
       seat.isBooked = true;
       seat.dateFrom = dateFrom;
       seat.dateTo = dateTo;
-      seat.empId = empId;
+      seat.empGmail = empGmail;
       seat.empName = empName;
       seat.bookingDateFrom = dateFrom;
       seat.bookingDateTo = dateTo;

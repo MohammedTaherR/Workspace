@@ -15,7 +15,7 @@ const CancelDialog = ({ isOpen, onClose, item, cancelRef }) => {
     axios
       .post('http://localhost:8080/api/seats/cancel', {
         seatNumber: item.seatNumber,
-        empId: item.empId,
+        empGmail: item.empGmail,
         empName: item.empName,
       })
       .then((res) => {
