@@ -17,9 +17,11 @@ function App() {
   const [data, setData] = useState();
   const [loading, setLoading] = useState(false);
   const [booking, setBooking] = useState(false);
-  const [seatNumber, setSeatNumber] = useState(0);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userEmail, setUserEmail] = useState('');
+  const [user, setUser] = useState({
+    name: '',
+    email: '',
+  });
 
 
   // Fetch seat data on component mount
@@ -30,10 +32,10 @@ function App() {
 
   const checkLoginStatus = () => {
     try {
-      const userEmail = localStorage.getItem('email');
-      if (userEmail) {
+      const user = localStorage.getItem('user');
+      if(user){
         setIsLoggedIn(true);
-        return;
+        setUser(JSON.parse(user));
       }
       gapi.load('client:auth2', () => {
         gapi.client.init({
@@ -46,35 +48,39 @@ function App() {
     }
 
   }
-  const storeToLocalStorage = (email) => {
-    if (email.trim().length === 0) {
-      return;
-    }
+  const storeToLocalStorage = (key, value) => {
+    if(!key || !value) return;
     try {
-      localStorage.setItem('email', email);
+      // TODO: add a expiration time for stored kvs
+      localStorage.setItem(key, value);
     } catch (e) {
-      console.error(`Unable to store email in local storage : ${e}`);
+      console.error(`Unable to store ${key} in local storage : ${e}`);
     }
-  }
+  } 
 
-  const removeFromLocalStorage = () => {
+  const removeFromLocalStorage = (key) => {
     try {
-      localStorage.removeItem('email');
+      localStorage.removeItem(key);
     } catch (e) {
-      console.error(`Unable to remove email from local storage : ${e}`);
+      console.error(`Unable to remove ${key} from local storage : ${e}`);
     }
   }
 
   const handleLogin = (response) => {
     const email = response.profileObj.email;
-    if(!email || email == ''){
+    const name = response.profileObj.name;
+    if(!email || email == '' && !name || name == ''){
       console.error('Failure in resolution of user email');
       setIsLoggedIn(false);
       return;
     }
-    storeToLocalStorage(email);
+    const user = {
+      name: name,
+      email: email
+    };
+    storeToLocalStorage('user',user);
     setIsLoggedIn(true);
-    setUserEmail(email);
+    setUser(user);
 
   }
 
@@ -95,37 +101,48 @@ function App() {
     }
   };
 
-  const checkBookingStatus = (seatNumber) => {
+  const checkBookingStatus = (seat) => {
+    const {seatNumber} = seat;
     if(!data){
       return;
     }
-    const seat = data.find(seat => seat.seatNumber == seatNumber);
-    console.log('seat : ',seat);
     if(seat && seat.isBooked){
-      console.log(`user email : ${seat.empGmail} == ${userEmail}`);
-      if(seat.empGmail !== userEmail){
+      if(seat.empGmail !== user.email){
         return;
       }
-      if(seat.empGmail === userEmail){
-        const cancelConfirmation = window.confirm('Are you sure you want to unbook this seat?');
-        if(cancelConfirmation === true){
-          handleCancel(seatNumber);
-        }
+      const cancelConfirmation = window.confirm('Are you sure you want to unbook this seat?');
+      if(cancelConfirmation === true){
+        handleCancel(seatNumber);
       }
     }else{
-      console.log('booking seatNumber : ',seatNumber);
-      setSeatNumber(seatNumber);
-      setBooking(true);
+      const dataPayload = {
+        seatNumber, 
+        empGmail: user.email,
+        empName: user.name,
+      }
+      handleBooking(dataPayload);
     }
   }
 
   const handleCancel = (seatNumber) => {
-    console.log('cancel seatNumber : ',seatNumber);
+    const payload = {
+      seatNumber : seatNumber
+    }
     // TODO: handle if not all params are available and make the repective api call
+    axios.post("http://localhost:8080/api/seats/cancel", payload)
+      .then((res) => {
+        if (!res.data.ok) {
+          alert(`booking failed ${res.data.message}`);
+        }
+        fetchData();
+      })
+      .catch((err) => {
+        console.log('error while booking ', err);
+      });
   }
 
-  const handleClick = (seatNumber) => {
-    checkBookingStatus(seatNumber);
+  const handleClick = (seat) => {
+    checkBookingStatus(seat);
   }
 
   function getNextMonday() {
@@ -143,14 +160,13 @@ function App() {
   }
 
   const handleBooking = (data) => {
-    console.log('booking ....');
-    console.log(data);
     /*
       {
         seatNumber, 
-        EID,
-        Ename,
-        date from and date to,
+        user gmail, 
+        user name,
+        date from,
+        date to,
       }
     */
     // TODO: clean up code and modify synatx with await 
@@ -162,20 +178,16 @@ function App() {
       dateFrom: datefrom,
       dateTo: dateTo
     }
-    console.log('final data to send to server', payload);
     // send the data to the server
     axios.post("http://localhost:8080/api/seats/book", payload)
       .then((res) => {
-        console.log(res.data);
         if (!res.data.ok) {
           alert(`booking failed ${res.data.message}`);
         }
         fetchData();
-        setBooking(false);
       })
       .catch((err) => {
         console.log('error while booking ', err);
-        setBooking(false);
       });
   }
   return (
@@ -191,9 +203,9 @@ function App() {
             {/* create a state to handle admin user and normal user, move the below portions to a ternary operator for better readability */}
             <Flex justify={"space-around"} align={"center"} h="100vh" minHeight={"fit-content"} bg={"#E5E7EB"} >
               {/* Compartment component to display seat grid */}
+              {/* TODO: add loaders with booking state, create new state to handle user type and display appropriate component */}
               {
-                new URLSearchParams(window.location.search).get('admin') === 'true' ? <DisplaySeats data={data} /> :
-                  !booking ? <Compartment data={data} loading={loading} handleClick={handleClick} /> : <Booking seatNumber={seatNumber} handleBooking={handleBooking}></Booking>
+                new URLSearchParams(window.location.search).get('admin') === 'true' ? <DisplaySeats data={data} /> :  <Compartment data={data} loading={loading} handleClick={handleClick} /> 
               }
             </Flex>
           </div>)
