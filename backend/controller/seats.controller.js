@@ -154,17 +154,60 @@ const bookingController = async (req, res) => {
       res.status(500).json({ message: 'Internal Server Error' });
     }
 }
-async function deleteSeat(seatNumber) {
+async function deleteSeat(req, res) { 
+  seatNumber = req.body.seatNumber;
   try {
     const result = await Seat.deleteOne({ seatNumber: seatNumber });
     if (result.deletedCount === 0) {
       return { message: `Seat with number ${seatNumber} not found` };
     }
-    return { message: `Seat with number ${seatNumber} deleted successfully` };
+    return res.status(200).json({ message: `Seat with number ${seatNumber} deleted successfully` });
   } catch (err) {
-    return { message: 'Internal Server Error' };
+    return res.status(500).json({ message: 'Internal Server Error' });
   }
 }
+// cancel seats
+async function cancelSeat(req,res) {
+  const seatNumber = req.body.seatNumber;
+  try {
+    const seat = await Seat.findOne({ seatNumber: seatNumber });
+    if (!seat) {
+      return { message: `Seat with number ${seatNumber} not found` };
+    }
+    seat.isBooked = false;
+    seat.empId = '';
+    seat.empName = '';
+    seat.bookingDateFrom = null;
+    seat.bookingDateTo = null;
+    await seat.save();
+    return res.status(200).json({ message: `Seat with number ${seatNumber} cancelled successfully` });
+  } catch (err) {
+    return res.status(500).json({ message: 'Internal Server Error' });
+  }
+}
+
+
+// add seats
+async function addSeat(req,res) {
+  const {seatNumber, isMonitorPresent} = req.body;
+  try {
+    const seat = new Seat({
+      seatNumber: seatNumber,
+      isBooked: false,
+      rowNumber: Math.ceil(seatNumber/7),
+      isMonitorPresent: req.body.isMonitorPresent,
+      empId : '',
+      empName : '',
+      bookingDateFrom : null,
+      bookingDateTo : null
+    });
+    await seat.save();
+    return res.status(200).json({ message: `Seat with number ${seatNumber} added successfully` });
+  } catch (err) {
+    return res.status(500).json({ message: 'Internal Server Error' });
+  }
+}
+
 // get seats
 const getSeats = async (req, res) => {
   try {
@@ -208,4 +251,4 @@ const resetSeatsController = async (req, res) => {
 
 
 
-module.exports = { bookingController, resetSeatsController, getSeats, deleteSeat };
+module.exports = { bookingController, resetSeatsController, getSeats, deleteSeat , cancelSeat, addSeat};

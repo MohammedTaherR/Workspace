@@ -20,18 +20,5 @@ console.log("unstop assignment");
 
 app.use("/api/seats", seatsRoutes);
 
-
-app.post("/api/seats/remove", (req, res) => {
-    console.log("inside cancel");
-    console.log(req.body);
-    deleteSeat(req.body.seatNumber).then((result) => {
-    console.log(result);
-  }).catch((err) => {
-    console.error(err);
-  });
-    res.send("success");
-  });
-
-
 const port = process.env.PORT || 8080;
 app.listen(port, ()=>{ console.log(" server running at port = ", port) });
