@@ -1,6 +1,8 @@
 import React from 'react'
-import axios from 'axios';
-import { Box, Flex, Table,Text, Thead, Tbody, Tr, Th, Td, TableContainer, Button, AlertDialog, AlertDialogOverlay, AlertDialogContent, AlertDialogHeader, AlertDialogFooter, AlertDialogBody } from '@chakra-ui/react'
+import CancelDialog from './CancelDialog';
+import AddSeatDialog from './AddSeatDialog';
+import { Box, Flex, Table,Text, Thead, Tbody, Tr, Th, Td, TableContainer, Button } from '@chakra-ui/react'
+
 export default function DisplaySeats({data}) {
   const [isOpen, setIsOpen] = React.useState(false)
   const onClose = () => setIsOpen(false)
@@ -15,12 +17,11 @@ export default function DisplaySeats({data}) {
             <Button
               size="sm"
               colorScheme="blue"
-              onClick={() => {
-                window.location.href = "/addseats";
-              }}
+              onClick={() => setIsOpen(true)}
             >
               Add new Seats
             </Button>
+            <AddSeatDialog isOpen={isOpen} onClose={onClose} />   
             <Button
               size="sm"
               colorScheme="red"
@@ -66,48 +67,7 @@ export default function DisplaySeats({data}) {
                     >
                       Cancel
                     </Button>
-                    <AlertDialog
-                      isOpen={isOpen}
-                      leastDestructiveRef={cancelRef}
-                      onClose={onClose}
-                    >
-                      <AlertDialogOverlay>
-                        <AlertDialogContent>
-                          <AlertDialogHeader fontSize="lg" fontWeight="bold">
-                            Cancel Booking
-                          </AlertDialogHeader>
-                          <AlertDialogBody>
-                            Are you sure you want to cancel booking for seat number {item.seatNumber}?
-                          </AlertDialogBody>
-                          <AlertDialogFooter>
-                            <Button ref={cancelRef} onClick={onClose}>
-                              No
-                            </Button>
-                            <Button
-                              colorScheme="red"
-                              onClick={() => {
-                                axios.post("http://localhost:8080/api/seats/cancel", {
-                                  seatNumber: item.seatNumber,
-                                  empId: item.empId,
-                                  empName: item.empName,
-                                })
-                                  .then((res) => {
-                                    console.log(res.data);
-                                    window.location.reload();
-                                  })
-                                  .catch((err) => {
-                                    console.error('Error while cancelling booking ',err);
-                                  });
-                                onClose();
-                              }}
-                              ml={3}
-                            >
-                              Yes
-                            </Button>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialogOverlay>
-                    </AlertDialog>
+                    <CancelDialog isOpen={isOpen} onClose={onClose} item={item} cancelRef={cancelRef} />
                   </Td>
                 </Tr>
               ))}
@@ -118,10 +78,9 @@ export default function DisplaySeats({data}) {
           <Button
             size="sm"
             colorScheme="blue"
-            onClick={() => {
-              window.location.href = "/addseats";
-            }}
+            onClick={() => setIsOpen(true)}
           >
+            <AddSeatDialog isOpen={isOpen} onClose={onClose} />   
             Add new Seats
           </Button>
           <Button
