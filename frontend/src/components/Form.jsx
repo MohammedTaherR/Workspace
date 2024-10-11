@@ -38,6 +38,9 @@ export default function HookForm({handleBooking,seatNumber}) {
         <Heading as="h2" size="lg" mb={4}>
           Employee Details
         </Heading>
+        <Heading as="h1" size="md" mb={4}>
+          <Text>Seat Number : {seatNumber}</Text>
+        </Heading>
         <form onSubmit={onSubmit}>
           <FormControl isInvalid={data.empId === ''}>
             <FormLabel htmlFor="name">Employee ID</FormLabel>
