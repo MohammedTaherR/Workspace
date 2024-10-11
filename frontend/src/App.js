@@ -1,7 +1,6 @@
 import './App.css';
 import { Flex } from '@chakra-ui/react';
 import Compartment from './components/Compartment';
-import Booking from './components/Booking';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 import DisplaySeats from './components/DisplaySeats';
@@ -33,9 +32,9 @@ function App() {
   const checkLoginStatus = () => {
     try {
       const user = localStorage.getItem('user');
-      if(user){
+      if (user) {
         setIsLoggedIn(true);
-        setUser(JSON.parse(user));
+        setUser(user);
       }
       gapi.load('client:auth2', () => {
         gapi.client.init({
@@ -49,14 +48,14 @@ function App() {
 
   }
   const storeToLocalStorage = (key, value) => {
-    if(!key || !value) return;
+    if (!key || !value) return;
     try {
       // TODO: add a expiration time for stored kvs
       localStorage.setItem(key, value);
     } catch (e) {
       console.error(`Unable to store ${key} in local storage : ${e}`);
     }
-  } 
+  }
 
   const removeFromLocalStorage = (key) => {
     try {
@@ -66,19 +65,33 @@ function App() {
     }
   }
 
-  const handleLogin = (response) => {
+  const checkIsAdmin = async (email) => {
+    try {
+      const response = await axios.post(`http://localhost:8080/api/admin`, {
+        email: email
+      });
+      return response.data.isAdmin;
+    } catch (error) {
+      console.error('Error checking if user is admin:', error);
+      return false;
+    }
+  }
+
+  const handleLogin = async (response) => {
     const email = response.profileObj.email;
     const name = response.profileObj.name;
-    if(!email || email == '' && !name || name == ''){
+    if (!email || email == '' && !name || name == '') {
       console.error('Failure in resolution of user email');
       setIsLoggedIn(false);
       return;
     }
+    const isAdmin = await checkIsAdmin(email);
     const user = {
       name: name,
-      email: email
+      email: email,
+      isAdmin: isAdmin
     };
-    storeToLocalStorage('user',user);
+    storeToLocalStorage('user', user);
     setIsLoggedIn(true);
     setUser(user);
 
@@ -102,21 +115,21 @@ function App() {
   };
 
   const checkBookingStatus = (seat) => {
-    const {seatNumber} = seat;
-    if(!data){
+    const { seatNumber } = seat;
+    if (!data) {
       return;
     }
-    if(seat && seat.isBooked){
-      if(seat.empGmail !== user.email){
+    if (seat && seat.isBooked) {
+      if (seat.empGmail !== user.email) {
         return;
       }
       const cancelConfirmation = window.confirm('Are you sure you want to unbook this seat?');
-      if(cancelConfirmation === true){
+      if (cancelConfirmation === true) {
         handleCancel(seatNumber);
       }
-    }else{
+    } else {
       const dataPayload = {
-        seatNumber, 
+        seatNumber,
         empGmail: user.email,
         empName: user.name,
       }
@@ -127,7 +140,7 @@ function App() {
 
   const handleCancel = (seatNumber) => {
     const payload = {
-      seatNumber : seatNumber
+      seatNumber: seatNumber
     }
     // TODO: handle if not all params are available and make the repective api call
     axios.post("http://localhost:8080/api/seats/cancel", payload)
@@ -202,13 +215,11 @@ function App() {
           :
           (<div>
             <Logout onLogout={handleLogout} />
-            {/* create a state to handle admin user and normal user, move the below portions to a ternary operator for better readability */}
-            <Flex justify={"space-around"} align={"center"} h="100vh" minHeight={"fit-content"} bg={"#E5E7EB"} >
+            <Flex justify={"space-around"} align={"center"} h="100vh" minHeight={"fit-content"} bg={"#E5E7EB"} flexDirection={"column"}>
               {/* Compartment component to display seat grid */}
-              {/* TODO: add loaders with booking state, create new state to handle user type and display appropriate component */}
-              {
-                new URLSearchParams(window.location.search).get('admin') === 'true' ? <DisplaySeats data={data} /> :  <Compartment data={data} loading={loading} handleClick={handleClick} /> 
-              }
+              {/* TODO: add loaders with booking state*/}
+              {user.isAdmin ?  <DisplaySeats data={data} /> : null}
+              <Compartment data={data} loading={loading} handleClick={handleClick} />
             </Flex>
           </div>)
       }

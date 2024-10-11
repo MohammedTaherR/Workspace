@@ -1,5 +1,6 @@
 // controller.js
 const Seat = require('../models/seats.model');
+const {Admin} = require('../models/admin.model');
 
 // Controller function to book seats
 /*
@@ -144,5 +145,14 @@ const resetSeatsController = async (req, res) => {
 };
 
 
+const isAdmin = async (req, res) => {
+  const { email } = req.body;
+  const admin = await Admin.findOne({ email });
+  if (!admin) {
+    return res.status(200).json({ isAdmin: false });
+  }
+  return res.status(200).json({ isAdmin: true });
+};
 
-module.exports = { bookingController, resetSeatsController, getSeats, deleteSeat , cancelSeat, addSeat};
+
+module.exports = { bookingController, resetSeatsController, getSeats, deleteSeat , cancelSeat, addSeat, isAdmin};

@@ -1,6 +1,7 @@
 const express =  require("express");
 const connectionDB = require("./config/db");
 const seatsRoutes = require("./routes/seats.routes")
+const adminsRoutes = require("./routes/admin.routes")
 const dotenv = require("dotenv");
 const cors = require('cors');
 
@@ -15,6 +16,7 @@ app.get("/",(req, res)=>{
 })
 
 app.use("/api/seats", seatsRoutes);
+app.use("/api/admin", adminsRoutes);
 
 const port = process.env.PORT || 8080;
 app.listen(port, ()=>{ console.log(" server running at port = ", port) });
