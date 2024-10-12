@@ -1,6 +1,14 @@
 // controller.js
 const Seat = require('../models/seats.model');
-const {Admin} = require('../models/admin.model');
+const { Admin } = require('../models/admin.model');
+const nodemailer = require('nodemailer');
+
+// Credentials for Nodemailer
+// TODO: Replace creds with process.env
+const sender = 'mcwmailer@gmail.com';
+const password = 'icvwemivlokmgkbm'; // Use app password for Gmail
+
+
 
 // Controller function to book seats
 /*
@@ -13,43 +21,53 @@ const {Admin} = require('../models/admin.model');
   }
 */
 const bookingController = async (req, res) => {
-    // TODO: handle if not all params are available 
-    const {
-      dateFrom,
-      dateTo,
-      seatNumber,
-      empGmail,
-      empName
-    } = req.body;
-    // console.log('booking from be',req.body);
-    try{
-      let seat  = await Seat.findOne({ seatNumber });
-      let empSeat = await Seat.findOne({ empGmail });       
-      if(!seat){
-        return res.status(200).json({ message: 'Seat not found',ok: false });
-      }
-      if(seat.isBooked){
-        return res.status(200).json({ message: 'Seat already booked',ok: false  });
-      }
-      if(empSeat){
-        return res.status(200).json({ message: 'Employee already booked seats',ok: false  });
-      }
-      seat.isBooked = true;
-      seat.dateFrom = dateFrom;
-      seat.dateTo = dateTo;
-      seat.empGmail = empGmail;
-      seat.empName = empName;
-      seat.bookingDateFrom = dateFrom;
-      seat.bookingDateTo = dateTo;
-      seat.updated_at = new Date();
-      await seat.save();
-      res.status(200).json({ message: 'Seat booked successfully',ok: true});
-    }catch(e){
-      console.error(e);
-      res.status(500).json({ message: 'Internal Server Error' });
+  // TODO: handle if not all params are available 
+  const {
+    dateFrom,
+    dateTo,
+    seatNumber,
+    empGmail,
+    empName
+  } = req.body;
+  try {
+    let seat = await Seat.findOne({ seatNumber });
+    let empSeat = await Seat.findOne({ empGmail });
+    if (!seat) {
+      return res.status(200).json({ message: 'Seat not found', ok: false });
     }
+    if (seat.isBooked) {
+      return res.status(200).json({ message: 'Seat already booked', ok: false });
+    }
+    if (empSeat) {
+      return res.status(200).json({ message: 'Employee already booked seats', ok: false });
+    }
+    seat.isBooked = true;
+    seat.dateFrom = dateFrom;
+    seat.dateTo = dateTo;
+    seat.empGmail = empGmail;
+    seat.empName = empName;
+    seat.bookingDateFrom = dateFrom;
+    seat.bookingDateTo = dateTo;
+    seat.updated_at = new Date();
+    await seat.save();
+    // send mail on booking
+    const handleMail = (err, info) => {
+      if (err) {
+        return res.status(500).json({ message: 'Unable to send mail' });
+      }
+      if (info.response.includes('OK')) {
+        return res.status(200).json({ message: 'Seat booked successfully', ok: true });
+      }
+      return res.status(500).json({ message: 'Internal Server Error Unable to send mail' });
+    }
+    sendMail(seat, handleMail)
+    // res.status(200).json({ message: 'Seat booked successfully', ok: true });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
 }
-async function deleteSeat(req, res) { 
+async function deleteSeat(req, res) {
   seatNumber = req.body.seatNumber;
   try {
     const result = await Seat.deleteOne({ seatNumber: seatNumber });
@@ -62,7 +80,7 @@ async function deleteSeat(req, res) {
   }
 }
 // cancel seats
-async function cancelSeat(req,res) {
+async function cancelSeat(req, res) {
   const seatNumber = req.body.seatNumber;
   try {
     const seat = await Seat.findOne({ seatNumber: seatNumber });
@@ -83,18 +101,18 @@ async function cancelSeat(req,res) {
 
 
 // add seats
-async function addSeat(req,res) {
-  const {seatNumber, isMonitorPresent} = req.body;
+async function addSeat(req, res) {
+  const { seatNumber, isMonitorPresent } = req.body;
   try {
     const seat = new Seat({
       seatNumber: seatNumber,
       isBooked: false,
-      rowNumber: Math.ceil(seatNumber/7),
+      rowNumber: Math.ceil(seatNumber / 7),
       isMonitorPresent: req.body.isMonitorPresent,
-      empGmail : null,
-      empName : null,
-      bookingDateFrom : null,
-      bookingDateTo : null
+      empGmail: null,
+      empName: null,
+      bookingDateFrom: null,
+      bookingDateTo: null
     });
     await seat.save();
     return res.status(200).json({ message: `Seat with number ${seatNumber} added successfully` });
@@ -117,19 +135,19 @@ const getSeats = async (req, res) => {
 }
 
 //  reset all seats to available
-function populateDB(){
+function populateDB() {
   NUM_ROWS = 12;
   NUM_SEATS_PER_ROW = 7;
   NUM_SEATS = NUM_ROWS * NUM_SEATS_PER_ROW;
-  NUM_MONITORS = parseInt(NUM_SEATS *(0.3)); // 30 percent sys with monitor
+  NUM_MONITORS = parseInt(NUM_SEATS * (0.3)); // 30 percent sys with monitor
   for (let i = 1; i <= NUM_SEATS; i++) {
-      let seat = new Seat({
-          seatNumber: i,
-          isBooked: false,
-          rowNumber: Math.floor(i / NUM_SEATS_PER_ROW) + 1,
-          isMonitorPresent: (i<=NUM_MONITORS)
-      });
-      seat.save();
+    let seat = new Seat({
+      seatNumber: i,
+      isBooked: false,
+      rowNumber: Math.floor(i / NUM_SEATS_PER_ROW) + 1,
+      isMonitorPresent: (i <= NUM_MONITORS)
+    });
+    seat.save();
   }
   console.log("DB populated successfully");
 }
@@ -154,5 +172,46 @@ const isAdmin = async (req, res) => {
   return res.status(200).json({ isAdmin: true });
 };
 
+const sendMail = ({
+  empGmail,
+  seatNumber,
+  dateFrom,
+  dateTo,
+  empName
+}, handler) => {
+  const transporter = nodemailer.createTransport({
+    host: 'smtp.gmail.com',
+    port: 587,
+    secure: false, // Use TLS
+    auth: {
+      user: sender,
+      pass: password
+    }
+  });
 
-module.exports = { bookingController, resetSeatsController, getSeats, deleteSeat , cancelSeat, addSeat, isAdmin};
+  const mailContent = `Hi ${empName},\n\n
+    Your seat ${seatNumber} has been booked from ${new Date(dateFrom).toDateString()} to ${new Date(dateTo).toDateString()}.\n\n
+    Thank you for using our service.`
+
+  // Email content
+  const mailOptions = {
+    from: sender,
+    to: empGmail,
+    subject: 'Booking Confirmation',
+    text: mailContent
+  };
+
+  // Send email
+  transporter.sendMail(mailOptions, (error, info) => {
+    if (error) {
+      handler(error);
+      console.error('Error sending email:', error);
+    } else {
+      handler(null, info);
+      console.log('Email sent:', info);
+    }
+  });
+}
+
+
+module.exports = { bookingController, resetSeatsController, getSeats, deleteSeat, cancelSeat, addSeat, isAdmin };
