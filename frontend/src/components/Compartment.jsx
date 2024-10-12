@@ -3,7 +3,7 @@ import React from 'react'
 import Seat from './Seat'
 
 // Compartment component that displays the seat grid and booking status.
-export default function Compartment({ loading, data, handleClick }) {
+export default function Compartment({ user, loading, data, handleClick }) {
 
     let booked =0
     let notBooked =0
@@ -22,7 +22,7 @@ export default function Compartment({ loading, data, handleClick }) {
             <Grid templateColumns='repeat(7, 1fr)' gap={1} bg="#FAFAFA" minH={"fit-content"} h="80vh" minW={"400px"} w="fit-content" rounded={"lg"} p="2" overflow = "auto">
 
                 {data?.map((item) => (
-                    <Seat key={item._id} seat={item} handleClick={handleClick} />
+                    <Seat user={user} key={item._id} seat={item} handleClick={handleClick} />
                 ))}
             </Grid>
             {/* Booking status color lable */}
