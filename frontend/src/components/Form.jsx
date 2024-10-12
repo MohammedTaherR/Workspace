@@ -21,10 +21,12 @@ export default function HookForm({handleBooking,seatNumber}) {
     function onSubmit(e) {
         e.preventDefault();
         if(data.empName === ''){
-            return;
+          alert ('Please enter employee name');  
+          return;
         }
         if(data.empGmail === ''){
-            return;
+          alert ('Please enter employee email');
+          return;
         }
         handleBooking(data);
     }
