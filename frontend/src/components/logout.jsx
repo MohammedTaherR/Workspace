@@ -11,8 +11,8 @@ function Logout({ onLogout }) {
   return (
     <Flex
       position="fixed"
-      top={4}
-      right={4}
+      top={2}
+      right={2}
       align="center"
       justify="center"
     >
@@ -22,11 +22,11 @@ function Logout({ onLogout }) {
         onLogoutSuccess={onSuccess}
         render={(renderProps) => (
           <Button
-            size="lg"
-            variant="solid"
+            size="sm"
+            variant="outline"
             onClick={renderProps.onClick}
             disabled={renderProps.disabled}
-            bg="blue.500"
+            bg="blue.300"
             color="white"
           >
             Logout

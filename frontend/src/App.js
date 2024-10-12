@@ -215,7 +215,7 @@ function App() {
           :
           (<div>
             <Logout onLogout={handleLogout} />
-            <Flex justify={"space-around"} align={"center"} h="100vh" minHeight={"fit-content"} bg={"#E5E7EB"} flexDirection={"column"}>
+            <Flex justify={"space-around"} align={"center"} h="100vh" minHeight={"fit-content"} flexDirection={"column"}>
               {/* Compartment component to display seat grid */}
               {/* TODO: add loaders with booking state*/}
               {user.isAdmin ?  <DisplaySeats data={data} /> : null}
