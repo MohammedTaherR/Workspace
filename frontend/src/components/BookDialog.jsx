@@ -8,7 +8,6 @@ import {
   Button,
   FormControl,
   FormLabel,
-  Text,
   Input,
 } from '@chakra-ui/react'
 

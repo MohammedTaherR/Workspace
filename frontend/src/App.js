@@ -6,17 +6,11 @@ import { useEffect, useState } from 'react';
 import DisplaySeats from './components/DisplaySeats';
 import { gapi } from 'gapi-script';
 import Login from './components/login';
-import React from 'react';
 import Logout from './components/logout';
-import { AlertDialog, AlertDialogBody, AlertDialogFooter, AlertDialogHeader, AlertDialogContent, AlertDialogOverlay, Button } from '@chakra-ui/react'
 
 const clientId = "1049231966219-acsq85p6t0ccpd8orh0cdku3lq38qcs5.apps.googleusercontent.com";
 
 function App() {
-  // const [isOpen, setIsOpen] = useState(false);
-  const onClose = () => setIsOpen(false);
-  const cancelRef = React.useRef();
-  const [isOpen, setIsOpen] = useState(true); 
   // State variables
   const [data, setData] = useState();
   const [loading, setLoading] = useState(false);

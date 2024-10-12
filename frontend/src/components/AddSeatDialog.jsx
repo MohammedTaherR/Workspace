@@ -2,7 +2,6 @@ import React from 'react'
 
 import { Button, AlertDialog, AlertDialogBody, AlertDialogFooter, AlertDialogHeader, AlertDialogContent, AlertDialogOverlay, FormControl,Text,  FormLabel, Input } from '@chakra-ui/react'
 
-
 import axios from 'axios'
 
 export default function AddSeatDialog({isOpen, onClose}) {
