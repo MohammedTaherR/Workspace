@@ -43,7 +43,7 @@ async function populateAdminUsersDB(admins = []) {
                 email: admins[i]
             });
             await admin.save();
-        }    
+        }
         return true;
     } catch (e) {
         console.error(`Error while populating db : ${e}`);
@@ -51,22 +51,18 @@ async function populateAdminUsersDB(admins = []) {
     }
 }
 
-(async ()=>{
-   if(await populateSeatsDB()){
+(async () => {
+    if (await populateSeatsDB() == true) {
         console.log(`DB populated successfully`);
-        process.exit();
-   }else{
+    } else {
         console.error(`DB population failed`);
         process.exit();
     }
-})();
-
-(async () => {
-    if (await populateAdminUsersDB()) {
-        console.log(`DB populated successfully`);
+    if (await populateAdminUsersDB() == true) {
+        console.log(`Admin populated successfully`);
         process.exit();
     } else {
-        console.error(`DB population failed`);
+        console.error(`Admin population failed`);
         process.exit();
     }
 })();
