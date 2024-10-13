@@ -11,7 +11,6 @@ import Logout from './components/logout';
 const clientId = "1049231966219-acsq85p6t0ccpd8orh0cdku3lq38qcs5.apps.googleusercontent.com";
 
 function App() {
-
   // State variables
   const [data, setData] = useState();
   const [loading, setLoading] = useState(false);
@@ -219,7 +218,7 @@ function App() {
               {/* Compartment component to display seat grid */}
               {/* TODO: add loaders with booking state*/}
               {user.isAdmin ?  <DisplaySeats data={data} /> : null}
-              <Compartment data={data} loading={loading} handleClick={handleClick} />
+              <Compartment user={user} data={data} loading={loading} handleClick={handleBooking} />
             </Flex>
           </div>)
       }
